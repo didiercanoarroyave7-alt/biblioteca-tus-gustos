@@ -1,0 +1,558 @@
+<!-- ==========================================
+     DOCUMENTO HTML
+     ========================================== -->
+
+<!DOCTYPE html>
+
+<!-- Idioma de la página -->
+
+<html lang="es">
+
+<head>
+
+
+<!-- Permite usar caracteres especiales como ñ y tildes -->
+<meta charset="UTF-8">
+
+<!-- Hace que la página sea adaptable a celulares -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Título que aparece en la pestaña -->
+<title>Lista de Tareas Firebase - Tiempo Real</title>
+
+<style>
+    
+  /* ===== Estilos del menú ===== */
+        .m {
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .nmenu {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nmenu a {
+            text-decoration: none;
+            color: black;
+            background-color: aqua;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .nmenu li:hover {
+            transform: translateY(-3px);
+            transition: 0.3s;
+        }
+
+        .botonm {
+            display: none;
+            font-size: 28px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .botonm { display: block; }
+            .nmenu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: #333;
+                padding: 15px 0;
+                 animation: na 2s ease forwards;
+            }
+            .nmenu.active { display: flex; }
+            .nmenu li { text-align: center; padding: 10px 0; }
+        }
+
+        /* ===== Estilos generales de la página ===== */
+        body {
+            background-image: url(img/libros.jpg);   
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background-size: cover;
+        }
+
+        .container {
+            background-color: #f8d7da;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.1);
+        }
+
+        input {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            background: #007bff;
+            font-size: 16px;
+        }
+
+        button.delete {
+            background: #dc3545;
+        }
+
+        
+
+        #mensaje {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .exito {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        footer {
+            width: 100%;
+            height: 30px;
+            background-color: black;
+            color: azure;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 30px;
+        }
+
+        section#nosotros p {
+            font-size: 16px;
+        }
+
+
+
+
+.desc{
+    background-color: #f8d7da;
+    color: black;
+    text-align: center;
+    width: 90%;
+    height: auto;
+}
+
+.nmenu ul{
+    text-align: center;
+}
+
+footer{
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+
+
+
+
+
+
+
+
+   @keyframes na{
+    from {
+    opacity: 0;
+    transform: translateY(-15px);
+    }
+    to {
+    opacity: 1;
+    transform: translateY(0);
+   }
+}
+
+.nose{
+    background-color:violet;
+    color: black;
+    padding-inline: 20px;
+    border-color: #007bff;
+    border-radius: 2px;
+    width: auto;
+    height: auto;
+
+}
+</style>
+
+</head>
+ <!-- ===== Menú hamburguesa ===== -->
+    <header class="m">
+        
+        <button class="botonm" id="botonm">☰</button>
+        <ul class="nmenu" id="nmenu">
+            <li><a href="#nosotros">nosotros</a></li>
+            <li><a href="#agregar">agregar libros</a></li>
+            <li><a href="#listaTareas">lista </a></li>
+            
+        </ul>
+    </header>
+    
+<body>
+    <center>
+
+   
+
+
+<section id="nosotros">
+    <div class="desc">
+        <h1> BIBLIOTECA TUS GUSTOS </h1>
+        <P> La biblioteca especializada identifica tus gustos literarios, examina
+             su catálogo y te sugiere libros que se adaptan a tus intereses
+        </P>
+    </div>
+</section>
+
+
+
+<!-- ==========================================
+     CONTENEDOR PRINCIPAL
+     ========================================== -->
+
+<div id="agregar" class="container">
+
+<!-- Título principal -->
+<h1>📝 Lista de Libros</h1>
+
+<!-- Campo donde el usuario escribe -->
+<input
+    type="text"
+    id="tareaInput"
+    placeholder="Escribe una tarea..."
+>
+
+<!-- Botón para guardar -->
+<button onclick="agregarTarea()">
+    Agregar
+</button>
+
+<!-- Aquí se muestran mensajes -->
+<div id="mensaje"></div>
+
+
+</div>
+
+
+<!-- Aquí se muestran los libros -->
+<div id="listaTareas" class="nose">
+    <p>📭 Cargando...</p>
+</div>
+
+</center>
+
+<script  type="module" >
+
+/* ==========================================
+   IMPORTACIONES DE FIREBASE
+   ========================================== */
+
+/*
+initializeApp:
+Inicializa Firebase.
+*/
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
+/*
+getFirestore:
+Conecta con Firestore.
+
+collection:
+Obtiene una colección.
+
+addDoc:
+Guarda documentos.
+
+deleteDoc:
+Elimina documentos.
+
+doc:
+Obtiene un documento específico.
+
+onSnapshot:
+Escucha cambios en tiempo real.
+
+query y orderBy:
+Permiten ordenar resultados.
+*/
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    orderBy
+}
+from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+
+/* ==========================================
+   CONFIGURACIÓN DE FIREBASE
+   ========================================== */
+
+/*
+IMPORTANTE:
+Debes reemplazar estos datos por los de tu proyecto.
+*/
+const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROYECTO.firebaseapp.com",
+    projectId: "TU_PROYECTO",
+    storageBucket: "TU_PROYECTO.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+};
+
+/*
+Creamos la aplicación Firebase.
+*/
+const app = initializeApp(firebaseConfig);
+
+/*
+Creamos la conexión a Firestore.
+*/
+const db = getFirestore(app);
+
+
+/* ==========================================
+   MENSAJES
+   ========================================== */
+
+/*
+Muestra mensajes de éxito o error.
+*/
+function mostrarMensaje(texto,tipo){
+
+    const mensaje =
+        document.getElementById("mensaje");
+
+    mensaje.textContent = texto;
+
+    mensaje.className = tipo;
+
+    mensaje.style.display = "block";
+
+    setTimeout(()=>{
+        mensaje.style.display="none";
+    },3000);
+}
+
+
+/* ==========================================
+   AGREGAR TAREA
+   ========================================== */
+
+window.agregarTarea = async ()=>{
+
+    /*
+    Obtener referencia del input.
+    */
+    const input =
+        document.getElementById("tareaInput");
+
+    /*
+    Leer texto y quitar espacios.
+    */
+    const texto =
+        input.value.trim();
+
+    /*
+    Validar que no esté vacío.
+    */
+    if(!texto){
+        mostrarMensaje(
+            "❌ Debes escribir un libro",
+            "error"
+        );
+        return;
+    }
+
+    try{
+
+        /*
+        Guardar en Firestore.
+        */
+        await addDoc(
+            collection(db,"tareas"),
+            {
+                texto:texto,
+                fecha:Date.now()
+            }
+            
+        );
+
+        /*
+        Limpiar input.
+        */
+        input.value="";
+
+        /*
+        Mostrar mensaje.
+        */
+        mostrarMensaje(
+            "✅ Tarea guardada correctamente",
+            "exito"
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        mostrarMensaje(
+            "❌ Error al guardar",
+            "error"
+        );
+    }
+};
+
+
+/* ==========================================
+   ELIMINAR TAREA
+   ========================================== */
+
+window.eliminarTarea = async(id)=>{
+
+    try{
+
+        /*
+        Eliminar documento.
+        */
+        await deleteDoc(
+            doc(db,"tareas",id)
+        );
+
+        mostrarMensaje(
+            "🗑️ Tarea eliminada",
+            "exito"
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        mostrarMensaje(
+            "❌ Error al eliminar",
+            "error"
+        );
+    }
+};
+
+
+/* ==========================================
+   TIEMPO REAL
+   ========================================== */
+
+/*
+Creamos una consulta ordenada por fecha.
+*/
+const q =
+    query(
+        collection(db,"tareas"),
+        orderBy("fecha")
+    );
+
+/*
+onSnapshot escucha cambios automáticamente.
+*/
+onSnapshot(q,(snapshot)=>{
+
+    const lista =
+        document.getElementById("listaTareas");
+
+    lista.innerHTML="";
+
+    if(snapshot.empty){
+
+        lista.innerHTML=
+            "<p>📭 No hay libros guardados</p>";
+
+        return;
+    }
+
+    snapshot.forEach((docu)=>{
+
+        const tarea =
+            docu.data();
+
+        lista.innerHTML += `
+            <div class="item">
+                <span>${tarea.texto}</span>
+
+                <button
+                class="delete"
+                onclick="eliminarTarea('${docu.id}')">
+                Eliminar
+                </button>
+            </div>
+        `;
+    });
+
+});
+
+
+/* ==========================================
+   ENTER PARA GUARDAR
+   ========================================== */
+
+/*
+Si el usuario presiona Enter,
+se ejecuta agregarTarea().
+*/
+document
+.getElementById("tareaInput")
+.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter"){
+        agregarTarea();
+    }
+
+});
+
+
+
+
+
+// ===== Menú hamburguesa =====
+        const boton = document.getElementById("botonm");
+        const menu = document.getElementById("nmenu");
+
+        boton.addEventListener("click", () => {
+            menu.classList.toggle("active");
+        });
+
+</script>
+</body>
+
+<footer>
+    <p> LA FABRICA DE IDEAS </p>
+</footer>
+</html>
